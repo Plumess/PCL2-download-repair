@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>netstandard2.1</TargetFramework><AssemblyName>PclRepair.StartupHook</AssemblyName><Version>0.3.0</Version><EnableDefaultCompileItems>false</EnableDefaultCompileItems><LangVersion>latest</LangVersion></PropertyGroup>
+ <ItemGroup><Compile Include="StartupHook.cs" /></ItemGroup>
+</Project>

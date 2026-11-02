@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    tags: ['release-*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version from src/BuildInfo.cs, for example 0.3.6
+        required: true
+        type: string
+      dry_run:
+        description: Build and verify only, without creating a draft Release
+        required: true
+        type: boolean
+        default: true
+      hold_as_draft:
+        description: Keep verified assets as a draft for optional native app verification
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate version and main ancestry
+    runs-on: windows-2022
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate release request
+        id: version
+        shell: powershell
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $version=[regex]::Match([IO.File]::ReadAllText('src/BuildInfo.cs'),'AdapterVersion="([0-9.]+)"').Groups[1].Value
+          if($version -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'){throw 'Invalid release version'}
+          git merge-base --is-ancestor $env:GITHUB_SHA origin/main
+          if($LASTEXITCODE -ne 0){throw 'Release source must belong to main history'}
+          if($env:GITHUB_EVENT_NAME -eq 'push'){
+            if($env:GITHUB_REF_NAME -ne "release-$version"){throw 'Tag and BuildInfo version differ'}
+          }else{
+            if($env:GITHUB_REF -ne 'refs/heads/main' -or $env:REQUESTED_VERSION -ne $version){throw 'Manual release must use main and match BuildInfo'}
+          }
+          git show-ref --verify --quiet "refs/tags/release-$version"
+          if($LASTEXITCODE -eq 0){
+            $tagCommit=git rev-parse "refs/tags/release-$version^{commit}"
+            if($tagCommit -ne $env:GITHUB_SHA){throw 'Existing release tag points to a different source commit'}
+          }
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          exit 0
+
+  build:
+    name: Build release packages
+    needs: validate
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    name: Sign and publish Release
+    needs: [validate, build]
+    if: github.event_name == 'push' || !inputs.dry_run
+    runs-on: windows-2022
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download the exact run artifacts
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download $env:GITHUB_RUN_ID --repo $env:GITHUB_REPOSITORY --name "PCL2-download-repair-build-$env:GITHUB_RUN_ID" --dir .local/release-upload
+          if($LASTEXITCODE -ne 0){throw 'Artifact download failed'}
+      - name: Verify unsigned build
+        shell: powershell
+        run: ./scripts/verify-package.ps1 -OutputDir .local/release-upload
+      - name: Sign update manifest
+        shell: powershell
+        env:
+          PCL_REPAIR_SIGNING_KEY: ${{ secrets.PCL_REPAIR_SIGNING_KEY }}
+        run: ./scripts/sign-release.ps1 -FromEnvironment -ManifestPath .local/release-upload/update/manifest.json -OutputPath .local/release-upload/update/stable.signed.json
+      - name: Verify signed release
+        shell: powershell
+        run: ./scripts/verify-package.ps1 -OutputDir .local/release-upload -RequireSignature
+      - name: Publish verified Release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.validate.outputs.version }}
+          HOLD_DRAFT: ${{ inputs.hold_as_draft }}
+        run: ./scripts/publish-release.ps1 -OutputDir .local/release-upload -Version $env:RELEASE_VERSION -Repository $env:GITHUB_REPOSITORY -Commit $env:GITHUB_SHA -DraftOnly:($env:HOLD_DRAFT -eq 'true')

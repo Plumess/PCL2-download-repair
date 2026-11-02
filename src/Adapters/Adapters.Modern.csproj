@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>net9.0-windows</TargetFramework><UseWPF>true</UseWPF><EnableDefaultCompileItems>false</EnableDefaultCompileItems><AssemblyName>PclRepair.Adapter</AssemblyName><LangVersion>latest</LangVersion><NuGetAudit>false</NuGetAudit><NoWarn>$(NoWarn);SYSLIB0014</NoWarn></PropertyGroup>
+ <PropertyGroup><GenerateAssemblyInfo>false</GenerateAssemblyInfo></PropertyGroup>
+ <ItemGroup><Compile Include="*.cs" /><Compile Include="../BuildInfo.cs"/><Reference Include="0Harmony"><HintPath>../../.local/deps/net8.0_0Harmony.dll</HintPath><Private>true</Private></Reference></ItemGroup>
+</Project>

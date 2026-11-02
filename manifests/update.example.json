@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "version": "0.3.1",
+  "minimumBootstrap": 3,
+  "files": [
+    {"path":"framework/PclRepair.Adapter.dll","url":"https://github.com/OWNER/REPO/releases/download/release-0.3.1/framework-adapter.dll","sha256":"REPLACE_WITH_SHA256","size":0},
+    {"path":"framework/0Harmony.dll","url":"https://github.com/OWNER/REPO/releases/download/release-0.3.1/framework-harmony.dll","sha256":"REPLACE_WITH_SHA256","size":0},
+    {"path":"modern/PclRepair.Adapter.dll","url":"https://github.com/OWNER/REPO/releases/download/release-0.3.1/modern-adapter.dll","sha256":"REPLACE_WITH_SHA256","size":0},
+    {"path":"modern/0Harmony.dll","url":"https://github.com/OWNER/REPO/releases/download/release-0.3.1/modern-harmony.dll","sha256":"REPLACE_WITH_SHA256","size":0}
+  ]
+}

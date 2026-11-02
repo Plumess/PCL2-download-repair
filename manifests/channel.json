@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "manifestUrl": "https://github.com/plumess/PCL2-download-repair/releases/latest/download/stable.signed.json",
+  "publicKeyXml": "<RSAKeyValue><Modulus>n+blpOZGcgyr8SvEIRvMZhobCGhoYxjMZ+0aO8qFFbCYTpXs4d6dGJsSTMKMFSsf7TyMdOZ/AE9tzLyMbrAdLgsJYk5tPJsRCJgopBMzmvCyD15j9eNvKDDPhpjACdszkGan3WPqzIc1Jn8yDGtrIWOPHVUsTpCeFIceeSbbFMLAl52SNW/uRCsbeYMQ06csMMEb6qF9dptAXM3ZzJEn7i3MIUcIj+BK70usDxqEvXniYt+jZvgsHhEiWXDjbDD79sA+3dDfiHMZFUrOhz8nGLXSp/mafL6rS0tYiljnfB/kcms9HZtMVvT3JwcVDftGcEKlNm1FkN3wkmpgtoitsAXwjXeu62V72KcCpsnMQ2ad/WcWg6LMQqLqjaCjj5OJ1N5EI4Ebxf86irCiEZ/eqcXNf0W3FZh6GHInyd2oi/fTkIDdiIbZirOxXWh0S+12TjQfrV4PlzteTuN9+x1oWtjXtOh45tzRx5kqPdE6s8oc+oAXdGDiVkUXaFtG7B1Z</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"
+}
